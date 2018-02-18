@@ -17,11 +17,10 @@ import java.util.Random;
 
 public class Game extends SurfaceView implements Runnable {
     public static final String TAG = "Game";
-    private boolean mIsRunning = false;
-    private Thread mGameThread = null;
     public static final int STAGE_WIDTH = 1280;
     public static final int STAGE_HEIGHT = 720;
     public static final int STAR_COUNT = 64;
+    public static final int ENEMY_COUNT = 6;
     public static final long SECONDS_TO_NANOS = 1000000000;
     public static final long MILLIS_TO_NANOS = 1000000;
     public static final float NANOS_TO_MILLIS  = 1.0f/MILLIS_TO_NANOS;
@@ -31,10 +30,11 @@ public class Game extends SurfaceView implements Runnable {
     public static final long MS_PER_FRAME = 1000/TARGET_FRAMERATE;
     public static final long  NANOS_PER_FRAME = MS_PER_FRAME * MILLIS_TO_NANOS;
 
+    private boolean mIsRunning = false;
+    private Thread mGameThread = null;
     private long mLastSampleTime = 0;
     private long mFrameCount = 0;
     private float mAvgFramerate = 0;
-
     private SurfaceHolder mHolder;
     private Paint mPaint;
     private Canvas mCanvas;
@@ -51,6 +51,9 @@ public class Game extends SurfaceView implements Runnable {
         mPaint.setColor(Color.WHITE);
         for(int i = 0; i < STAR_COUNT; i++){
             mEntities.add(new Star());
+        }
+        for(int i = 0; i < ENEMY_COUNT; i++){
+            mEntities.add(new Enemy(context));
         }
 
     }
@@ -91,11 +94,17 @@ public class Game extends SurfaceView implements Runnable {
         if (!acquireAndLockCanvas()){
             return;
         }
-        mCanvas.drawColor(Color.BLACK);
+        mCanvas.drawColor(Color.GRAY);
 
         for(final Entity e: mEntities){
             e.render(mCanvas, mPaint);
         }
+        int size = 20;
+        float relation = (float)Math.sqrt(mCanvas.getWidth()*mCanvas.getHeight())/250;
+        float scaleSize = size*relation;
+        mPaint.setColor(Color.YELLOW);
+        mPaint.setTextSize(scaleSize);
+        mCanvas.drawText("FPS: " + mAvgFramerate, 10, scaleSize, mPaint);
         mHolder.unlockCanvasAndPost(mCanvas);
     }
 
