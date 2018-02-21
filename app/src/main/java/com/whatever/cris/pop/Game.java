@@ -40,7 +40,7 @@ public class Game extends SurfaceView implements Runnable {
     private Canvas mCanvas;
 
     private ArrayList<Entity> mEntities = new ArrayList<>();
-
+    private Player mPlayer;
 
 
     public Game(final Context context) {
@@ -55,6 +55,8 @@ public class Game extends SurfaceView implements Runnable {
         for(int i = 0; i < ENEMY_COUNT; i++){
             mEntities.add(new Enemy(context));
         }
+        mPlayer = new Player(context);
+        mEntities.add(mPlayer);
 
     }
 
