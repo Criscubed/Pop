@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -38,6 +39,7 @@ public class Game extends SurfaceView implements Runnable {
     private SurfaceHolder mHolder;
     private Paint mPaint;
     private Canvas mCanvas;
+    private boolean mIsBoosting;
 
     private ArrayList<Entity> mEntities = new ArrayList<>();
     private Player mPlayer;
@@ -81,8 +83,18 @@ public class Game extends SurfaceView implements Runnable {
     public void onDestroy() {
     }
 
+    //Q&D: stand in for an input manager interface
+    public float getPlayerSpeed(){
+        return mPlayer.getVelocityX();
+    }
     private void input(){
+        for(final Entity e: mEntities){
+            e.input(this);
+        }
+    }
 
+    public boolean isBooosting(){
+        return mIsBoosting;
     }
 
     private void update(){
@@ -96,18 +108,22 @@ public class Game extends SurfaceView implements Runnable {
         if (!acquireAndLockCanvas()){
             return;
         }
-        mCanvas.drawColor(Color.GRAY);
+        mCanvas.drawColor(Color.argb(255, 0x1D, 0X00, 0X33));
 
         for(final Entity e: mEntities){
             e.render(mCanvas, mPaint);
         }
+        drawHUD();
+        mHolder.unlockCanvasAndPost(mCanvas);
+    }
+
+    public void drawHUD(){
         int size = 20;
         float relation = (float)Math.sqrt(mCanvas.getWidth()*mCanvas.getHeight())/250;
         float scaleSize = size*relation;
         mPaint.setColor(Color.YELLOW);
         mPaint.setTextSize(scaleSize);
         mCanvas.drawText("FPS: " + mAvgFramerate, 10, scaleSize, mPaint);
-        mHolder.unlockCanvasAndPost(mCanvas);
     }
 
     private boolean acquireAndLockCanvas() {
@@ -147,5 +163,21 @@ public class Game extends SurfaceView implements Runnable {
         mLastSampleTime = System.nanoTime();
         mFrameCount = 0;
         Log.d(TAG, "FPS: " + mAvgFramerate);
+    }
+
+    @Override
+    public boolean onTouchEvent(final MotionEvent event){
+        switch(event.getAction() & MotionEvent.ACTION_MASK){
+            case MotionEvent.ACTION_DOWN:
+                mIsBoosting = true;
+                break;
+            case MotionEvent.ACTION_UP:
+                mIsBoosting = false;
+                break;
+            default:
+                //no action
+                break;
+        }
+        return true;
     }
 }

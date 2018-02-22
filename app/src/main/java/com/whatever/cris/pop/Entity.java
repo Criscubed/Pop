@@ -5,10 +5,6 @@ import android.graphics.Paint;
 
 import java.util.Random;
 
-/**
- * Created by Cris on 2/13/2018.
- */
-
 public class Entity {
     protected static Random mDice = new Random();
     protected float mX = 0;
@@ -27,7 +23,10 @@ public class Entity {
     public void worldWrap(final float width, final float height){
         mX = Utils.wrap(mX, -mWidth, width+mWidth);
     }
-    public void input(){}
+    public void input(Game game){
+
+    }
+
     public void update(){
         mX += mVelocityX;
         mY += mVelocityY;

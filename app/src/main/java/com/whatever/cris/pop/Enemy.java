@@ -14,6 +14,7 @@ import android.util.Log;
  */
 
 public class Enemy extends Entity {
+    protected float mPlayerSpeed = 0.0f;
     public static final String TAG = "Enemy";
     public static final float ENEMY_MAX_SPEED = 3;
     public static final int ENEMY_HEIGHT = 50;
@@ -22,16 +23,16 @@ public class Enemy extends Entity {
     public Enemy(Context context){
         super();
         int select = mDice.nextInt(3);
-        int resourceId = R.drawable.skull1;
+        int resourceId = R.drawable.skull;
         switch(select){
             case 0:
-                resourceId =  R.drawable.skull1;
+                resourceId =  R.drawable.skull;
                 break;
             case 1:
-                resourceId = R.drawable.skull2;
+                resourceId = R.drawable.no;
                 break;
             case 2:
-                resourceId = R.drawable.skull3;
+                resourceId = R.drawable.warning;
                 break;
             default:
                 Log.w(TAG, "You messed up your EnemyID" + select);
@@ -45,6 +46,17 @@ public class Enemy extends Entity {
         }
         respawn();
 
+    }
+
+    @Override
+    public void input(Game game){
+        mPlayerSpeed = game.getPlayerSpeed() * -1;
+    }
+
+    @Override
+    public void update(){
+        super.update();
+        mX += mPlayerSpeed;
     }
 
     public void respawn(){
