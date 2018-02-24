@@ -5,20 +5,23 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 /**
  * Created by Cris on 2/18/2018.
  */
 
 public class Player extends Entity {
+    public static final String TAG = "Player";
     public static final int MAX_HEALTH = 3;
     public static final int MIN_SPEED = 1;
     public static final int MAX_SPEED = 20;
     public static float ACCELERATION = 2;
-    public static final int GRAVITY = 12;
+    public static final int GRAVITY = 6;
     public static final int HEIGHT = 50;
     private boolean mIsBoosting = false;
     private Bitmap mBitmap;
+    private int mHealth = MAX_HEALTH;
 
     public Player(Context context){
         super();
@@ -33,6 +36,7 @@ public class Player extends Entity {
         mY = Game.STAGE_HEIGHT/2 - mHeight/2;
         mX = 10;
         mVelocityX = MIN_SPEED;
+        mHealth = MAX_HEALTH;
     }
 
     @Override
@@ -45,7 +49,7 @@ public class Player extends Entity {
             mVelocityY += ACCELERATION;
         }
         mVelocityX = Utils.clamp(mVelocityX, MIN_SPEED, MAX_SPEED);
-        mVelocityY = Utils.clamp(mVelocityX, -MAX_SPEED, GRAVITY);
+        mVelocityY = Utils.clamp(mVelocityY, -MAX_SPEED, GRAVITY);
         mY += mVelocityY;
         mY += GRAVITY;
         mY = Utils.clamp(mY, 0, Game.STAGE_HEIGHT - HEIGHT);
@@ -58,7 +62,22 @@ public class Player extends Entity {
     }
 
     @Override
+    public void onCollision(Entity that){
+        if(!(that instanceof  Enemy)) {
+            return;
+        }
+        mHealth--;
+        if(mHealth < 0){
+            Log.d(TAG, "ur ded");
+        }
+    }
+
+    @Override
     public void input(Game game){
         mIsBoosting = game.isBooosting();
+    }
+
+    public int getHealth() {
+        return mHealth;
     }
 }

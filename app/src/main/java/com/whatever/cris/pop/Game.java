@@ -33,16 +33,19 @@ public class Game extends SurfaceView implements Runnable {
 
     private boolean mIsRunning = false;
     private Thread mGameThread = null;
-    private long mLastSampleTime = 0;
-    private long mFrameCount = 0;
-    private float mAvgFramerate = 0;
     private SurfaceHolder mHolder;
     private Paint mPaint;
     private Canvas mCanvas;
     private boolean mIsBoosting;
-
     private ArrayList<Entity> mEntities = new ArrayList<>();
     private Player mPlayer;
+    private boolean mGameOver = false;
+    private long mDistanceTraveled = 0;
+    private long mLongestDistanceTraveled = 0;
+
+    private long mLastSampleTime = 0;
+    private long mFrameCount = 0;
+    private float mAvgFramerate = 0;
 
 
     public Game(final Context context) {
@@ -58,8 +61,6 @@ public class Game extends SurfaceView implements Runnable {
             mEntities.add(new Enemy(context));
         }
         mPlayer = new Player(context);
-        mEntities.add(mPlayer);
-
     }
 
     public void onResume() {
@@ -83,27 +84,32 @@ public class Game extends SurfaceView implements Runnable {
     public void onDestroy() {
     }
 
-    //Q&D: stand in for an input manager interface
-    public float getPlayerSpeed(){
-        return mPlayer.getVelocityX();
-    }
     private void input(){
+        mPlayer.input(this);
         for(final Entity e: mEntities){
             e.input(this);
         }
     }
 
-    public boolean isBooosting(){
-        return mIsBoosting;
-    }
-
     private void update(){
+        mPlayer.update();
         for(final Entity e: mEntities){
             e.update();
             e.worldWrap(STAGE_WIDTH, STAGE_HEIGHT);
         }
     }
 
+    private void checkCollisions(){
+        int ic = mEntities.size();
+        Entity temp;
+        for(int i = 0; i < ic; i++){
+            temp = mEntities.get(i);
+            if(mPlayer.isColliding(temp)){
+                temp.onCollision(mPlayer);
+                mPlayer.onCollision(temp);
+            }
+        }
+    }
     private void render(){
         if (!acquireAndLockCanvas()){
             return;
@@ -113,6 +119,7 @@ public class Game extends SurfaceView implements Runnable {
         for(final Entity e: mEntities){
             e.render(mCanvas, mPaint);
         }
+        mPlayer.render(mCanvas, mPaint);
         drawHUD();
         mHolder.unlockCanvasAndPost(mCanvas);
     }
@@ -123,7 +130,9 @@ public class Game extends SurfaceView implements Runnable {
         float scaleSize = size*relation;
         mPaint.setColor(Color.YELLOW);
         mPaint.setTextSize(scaleSize);
-        mCanvas.drawText("FPS: " + mAvgFramerate, 10, scaleSize, mPaint);
+        mCanvas.drawText("Health: " + mPlayer.getHealth(), 10, scaleSize, mPaint);
+        mCanvas.drawText("Speed: " + mPlayer.getVelocityX(), STAGE_WIDTH/2, scaleSize, mPaint);
+        mCanvas.drawText("FPS: " + mAvgFramerate, 10, STAGE_HEIGHT-scaleSize, mPaint);
     }
 
     private boolean acquireAndLockCanvas() {
@@ -142,17 +151,21 @@ public class Game extends SurfaceView implements Runnable {
             onEnterFrame();
             input();
             update();
+            checkCollisions();
             render();
-            float millisRemaining = ((start + NANOS_PER_FRAME) - System.nanoTime()) * NANOS_TO_MILLIS;
-            if(millisRemaining > 1){
-                try {
-                    Thread.sleep((long)millisRemaining);
-                } catch (InterruptedException e) {
-                }
-            }
+            rateLimit(start);
         }
     }
 
+    public void rateLimit(long start){
+        float millisRemaining = ((start + NANOS_PER_FRAME) - System.nanoTime()) * NANOS_TO_MILLIS;
+        if(millisRemaining > 1){
+            try {
+                Thread.sleep((long)millisRemaining);
+            } catch (InterruptedException e) {
+            }
+        }
+    }
     private void onEnterFrame(){
         mFrameCount++;
         long timeSinceLast = System.nanoTime() - mLastSampleTime;
@@ -180,4 +193,14 @@ public class Game extends SurfaceView implements Runnable {
         }
         return true;
     }
+
+    public boolean isBooosting(){
+        return mIsBoosting;
+    }
+
+    //Q&D: stand in for an input manager interface
+    public float getPlayerSpeed(){
+        return mPlayer.getVelocityX();
+    }
+
 }

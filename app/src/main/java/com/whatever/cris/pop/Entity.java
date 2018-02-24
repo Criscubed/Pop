@@ -33,6 +33,21 @@ public class Entity {
     }
     public void render(final Canvas canvas, final Paint paint){}
 
+    public boolean isColliding(Entity that){
+        return Entity.intersectsAABB(this, that);
+    }
+
+    public void onCollision(Entity e){
+
+    }
+
+    public static boolean intersectsAABB(Entity a, Entity b){
+        return !(a.right() < b.left()
+                || b.right() < a.left()
+                || a.bottom() < b.top()
+                || b.bottom() < a.top());
+    }
+
     public float left(){
         return mX;
     }

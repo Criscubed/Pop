@@ -59,6 +59,11 @@ public class Enemy extends Entity {
         mX += mPlayerSpeed;
     }
 
+    @Override
+    public void render(final Canvas canvas,final Paint paint) {
+        canvas.drawBitmap(mBitmap, mX, mY, paint);
+    }
+
     public void respawn(){
         mHeight = mBitmap.getHeight();
         mWidth = mBitmap.getWidth();
@@ -66,6 +71,7 @@ public class Enemy extends Entity {
         mX = Game.STAGE_WIDTH + mDice.nextInt((int)mWidth);
         mVelocityX = -1 + -mDice.nextInt((int)ENEMY_MAX_SPEED);
     }
+
     @Override
     public void worldWrap(final float width, final float height){
         if(mX < -mWidth){
@@ -74,8 +80,10 @@ public class Enemy extends Entity {
     }
 
     @Override
-    public void render(final Canvas canvas,final Paint paint) {
-        canvas.drawBitmap(mBitmap, mX, mY, paint);
+    public void onCollision(Entity that){
+        respawn();
     }
+
+
 
 }

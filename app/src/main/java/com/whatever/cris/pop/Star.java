@@ -6,13 +6,14 @@ import android.graphics.Paint;
 
 
 public class Star extends Entity {
+    protected static final float STAR_SIZE = 10;
     protected float mPlayerSpeed = 0.0f;
     protected int mStarColor;
     public Star(){
         super(mDice.nextInt(Game.STAGE_WIDTH),
                 mDice.nextInt(Game.STAGE_HEIGHT));
-        mWidth = 10;
-        mHeight = 10;
+        mWidth = STAR_SIZE;
+        mHeight = STAR_SIZE;
         mVelocityX = -mDice.nextFloat();
         mStarColor = mDice.nextInt(5);
     }
