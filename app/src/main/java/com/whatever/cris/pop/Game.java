@@ -1,6 +1,7 @@
 package com.whatever.cris.pop;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -43,13 +44,19 @@ public class Game extends SurfaceView implements Runnable {
     private long mDistanceTraveled = 0;
     private long mLongestDistanceTraveled = 0;
 
+    private SharedPreferences mPrefs;
+    public static final String PREFS = "com.whatever.cris.pop";
+    public static final String LONGEST_DIST = "longest_distance";
+
     private long mLastSampleTime = 0;
     private long mFrameCount = 0;
     private float mAvgFramerate = 0;
 
+    private SoundManager mSoundManager;
 
     public Game(final Context context) {
         super(context);
+        mSoundManager = new SoundManager(context);
         mHolder = getHolder();
         mHolder.setFixedSize(STAGE_WIDTH, STAGE_HEIGHT);
         mPaint = new Paint();
@@ -61,6 +68,19 @@ public class Game extends SurfaceView implements Runnable {
             mEntities.add(new Enemy(context));
         }
         mPlayer = new Player(context);
+
+        mPrefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        startGame();
+    }
+
+    private void startGame(){
+        mPlayer.respawn();
+        for(final Entity e: mEntities){
+            e.respawn();
+        }
+        mGameOver = false;
+        mDistanceTraveled = 0;
+        mLongestDistanceTraveled = mPrefs.getLong(LONGEST_DIST, 0);
     }
 
     public void onResume() {
@@ -69,7 +89,6 @@ public class Game extends SurfaceView implements Runnable {
         mGameThread = new Thread(this);
         mGameThread.start();
     }
-
     public void onPause() {
         Log.d(TAG, "onPause");
         mIsRunning =false;
@@ -80,7 +99,6 @@ public class Game extends SurfaceView implements Runnable {
             e.printStackTrace();
         }
     }
-
     public void onDestroy() {
     }
 
@@ -92,11 +110,15 @@ public class Game extends SurfaceView implements Runnable {
     }
 
     private void update(){
+        if(mGameOver){
+            return;
+        }
         mPlayer.update();
         for(final Entity e: mEntities){
             e.update();
             e.worldWrap(STAGE_WIDTH, STAGE_HEIGHT);
         }
+        mDistanceTraveled += mPlayer.getVelocityX();
     }
 
     private void checkCollisions(){
@@ -107,6 +129,9 @@ public class Game extends SurfaceView implements Runnable {
             if(mPlayer.isColliding(temp)){
                 temp.onCollision(mPlayer);
                 mPlayer.onCollision(temp);
+                if(temp instanceof Enemy){
+                    mSoundManager.play(SoundManager.CRASH);
+                }
             }
         }
     }
@@ -120,16 +145,35 @@ public class Game extends SurfaceView implements Runnable {
             e.render(mCanvas, mPaint);
         }
         mPlayer.render(mCanvas, mPaint);
-        drawHUD();
+        if(mGameOver){
+            drawGameOverHUD();
+        } else {
+            drawHUD();
+        }
         mHolder.unlockCanvasAndPost(mCanvas);
     }
 
+    public void drawGameOverHUD(){
+        int size = 30;
+        float relation = (float)Math.sqrt(mCanvas.getWidth()*mCanvas.getHeight())/250;
+        float scaleSize = size*relation;
+        mPaint.setColor(Color.WHITE);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        mPaint.setTextSize(scaleSize);
+        String result = "You Traveled " + mDistanceTraveled + " km!";
+        if(mDistanceTraveled > mLongestDistanceTraveled){
+            result = "New Record: " + mDistanceTraveled + "!";
+        }
+        mCanvas.drawText(result, STAGE_WIDTH/2, STAGE_HEIGHT/2 - scaleSize, mPaint);
+
+    }
     public void drawHUD(){
         int size = 20;
         float relation = (float)Math.sqrt(mCanvas.getWidth()*mCanvas.getHeight())/250;
         float scaleSize = size*relation;
         mPaint.setColor(Color.YELLOW);
         mPaint.setTextSize(scaleSize);
+        mPaint.setTextAlign(Paint.Align.LEFT);
         mCanvas.drawText("Health: " + mPlayer.getHealth(), 10, scaleSize, mPaint);
         mCanvas.drawText("Speed: " + mPlayer.getVelocityX(), STAGE_WIDTH/2, scaleSize, mPaint);
         mCanvas.drawText("FPS: " + mAvgFramerate, 10, STAGE_HEIGHT-scaleSize, mPaint);
@@ -152,8 +196,21 @@ public class Game extends SurfaceView implements Runnable {
             input();
             update();
             checkCollisions();
+            checkForGameOver();
             render();
             rateLimit(start);
+        }
+    }
+
+    private void checkForGameOver(){
+        if(mGameOver){
+            return;
+        }
+        mGameOver = (mPlayer.getHealth() <= 0);
+        if(mDistanceTraveled > mLongestDistanceTraveled){
+            SharedPreferences.Editor edit = mPrefs.edit();
+            edit.putLong(LONGEST_DIST, mDistanceTraveled);
+            edit.apply();
         }
     }
 
@@ -186,6 +243,9 @@ public class Game extends SurfaceView implements Runnable {
                 break;
             case MotionEvent.ACTION_UP:
                 mIsBoosting = false;
+                if(mGameOver){
+                    startGame();
+                }
                 break;
             default:
                 //no action
@@ -201,6 +261,10 @@ public class Game extends SurfaceView implements Runnable {
     //Q&D: stand in for an input manager interface
     public float getPlayerSpeed(){
         return mPlayer.getVelocityX();
+    }
+
+    public SoundManager getSoundManager(){
+        return mSoundManager;
     }
 
 }

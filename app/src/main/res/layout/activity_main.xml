@@ -23,4 +23,12 @@
         android:text="@string/startButtonText"
         android:textStyle="bold"
         android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/highScoreText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/startButton"
+        android:layout_centerHorizontal="true"
+        android:text="Longest Distance" />
 </RelativeLayout>

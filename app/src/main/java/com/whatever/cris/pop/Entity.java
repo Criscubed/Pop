@@ -20,13 +20,11 @@ public class Entity {
         mY = y;
     }
 
-    public void worldWrap(final float width, final float height){
-        mX = Utils.wrap(mX, -mWidth, width+mWidth);
-    }
+    public void respawn(){    }
+
     public void input(Game game){
 
     }
-
     public void update(){
         mX += mVelocityX;
         mY += mVelocityY;
@@ -36,16 +34,18 @@ public class Entity {
     public boolean isColliding(Entity that){
         return Entity.intersectsAABB(this, that);
     }
-
     public void onCollision(Entity e){
 
     }
-
     public static boolean intersectsAABB(Entity a, Entity b){
         return !(a.right() < b.left()
                 || b.right() < a.left()
                 || a.bottom() < b.top()
                 || b.bottom() < a.top());
+    }
+
+    public void worldWrap(final float width, final float height){
+        mX = Utils.wrap(mX, -mWidth, width+mWidth);
     }
 
     public float left(){
