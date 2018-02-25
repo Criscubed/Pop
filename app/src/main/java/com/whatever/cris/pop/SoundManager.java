@@ -20,6 +20,7 @@ public class SoundManager {
     public static final String TAG = "SoundManager";
     public static final int MAX_STREAMS = 4;
     public static int CRASH = 0;
+    public static int BOOST = 0;
     private SoundPool mSoundPool;
 
     public SoundManager(Context context){
@@ -44,8 +45,11 @@ public class SoundManager {
     private void loadSFX(AssetManager assetManager) {
         try{
             AssetFileDescriptor descriptor;
+            descriptor = assetManager.openFd("pop2.ogg");
+            BOOST = mSoundPool.load(descriptor, 0);
             descriptor = assetManager.openFd("pop1.ogg");
             CRASH = mSoundPool.load(descriptor, 0);
+
         } catch (IOException e){
             Log.e(TAG, "Your SFX dont work, kiddo " + e.toString());
         }

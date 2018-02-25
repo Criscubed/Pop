@@ -63,12 +63,19 @@ public class Player extends Entity {
 
     @Override
     public void onCollision(Entity that){
-        if(!(that instanceof  Enemy)) {
-            return;
-        }
-        mHealth--;
-        if(mHealth < 0){
-            Log.d(TAG, "ur ded");
+        if(that instanceof Enemy) {
+            mHealth--;
+            if (mHealth < 0) {
+                Log.d(TAG, "ur ded");
+            }
+        } else if (that instanceof Power){
+            Power p = (Power) that;
+            int whatDo = p.getPower();
+            switch (whatDo){
+                case 1: //flag
+                  mHealth++;
+            }
+            p.respawn();
         }
     }
 

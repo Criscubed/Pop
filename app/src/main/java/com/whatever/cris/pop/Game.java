@@ -22,7 +22,7 @@ public class Game extends SurfaceView implements Runnable {
     public static final int STAGE_WIDTH = 1280;
     public static final int STAGE_HEIGHT = 720;
     public static final int STAR_COUNT = 64;
-    public static final int ENEMY_COUNT = 6;
+    public static final int ENEMY_COUNT = 10;
     public static final long SECONDS_TO_NANOS = 1000000000;
     public static final long MILLIS_TO_NANOS = 1000000;
     public static final float NANOS_TO_MILLIS  = 1.0f/MILLIS_TO_NANOS;
@@ -31,6 +31,7 @@ public class Game extends SurfaceView implements Runnable {
     public static final long TARGET_FRAMERATE = 30;
     public static final long MS_PER_FRAME = 1000/TARGET_FRAMERATE;
     public static final long  NANOS_PER_FRAME = MS_PER_FRAME * MILLIS_TO_NANOS;
+    public static final long NEW_LIFE_SPAWN = 1000;
 
     private boolean mIsRunning = false;
     private Thread mGameThread = null;
@@ -43,6 +44,7 @@ public class Game extends SurfaceView implements Runnable {
     private boolean mGameOver = false;
     private long mDistanceTraveled = 0;
     private long mLongestDistanceTraveled = 0;
+
 
     private SharedPreferences mPrefs;
     public static final String PREFS = "com.whatever.cris.pop";
@@ -68,7 +70,9 @@ public class Game extends SurfaceView implements Runnable {
             mEntities.add(new Enemy(context));
         }
         mPlayer = new Player(context);
-
+        mEntities.add(new Power(context, Power.FLAG));
+        mEntities.add(new Power(context, Power.BIRB));
+        mEntities.add(new Power(context, Power.SWORD));
         mPrefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         startGame();
     }
@@ -81,6 +85,7 @@ public class Game extends SurfaceView implements Runnable {
         mGameOver = false;
         mDistanceTraveled = 0;
         mLongestDistanceTraveled = mPrefs.getLong(LONGEST_DIST, 0);
+
     }
 
     public void onResume() {
@@ -176,7 +181,7 @@ public class Game extends SurfaceView implements Runnable {
         mPaint.setTextAlign(Paint.Align.LEFT);
         mCanvas.drawText("Health: " + mPlayer.getHealth(), 10, scaleSize, mPaint);
         mCanvas.drawText("Speed: " + mPlayer.getVelocityX(), STAGE_WIDTH/2, scaleSize, mPaint);
-        mCanvas.drawText("FPS: " + mAvgFramerate, 10, STAGE_HEIGHT-scaleSize, mPaint);
+        mCanvas.drawText("FPS: " + mAvgFramerate, 10, STAGE_HEIGHT, mPaint);
     }
 
     private boolean acquireAndLockCanvas() {
@@ -240,6 +245,7 @@ public class Game extends SurfaceView implements Runnable {
         switch(event.getAction() & MotionEvent.ACTION_MASK){
             case MotionEvent.ACTION_DOWN:
                 mIsBoosting = true;
+                mSoundManager.play(SoundManager.BOOST);
                 break;
             case MotionEvent.ACTION_UP:
                 mIsBoosting = false;

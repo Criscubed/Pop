@@ -18,13 +18,16 @@ public class Enemy extends Entity {
     public static final String TAG = "Enemy";
     public static final float ENEMY_MAX_SPEED = 3;
     public static final int ENEMY_HEIGHT = 50;
+    public static final float VELOCITY_VARIANCE = 2;
+    private int sinCenter;
+    private int mSelect;
     Bitmap mBitmap;
 
     public Enemy(Context context){
         super();
-        int select = mDice.nextInt(3);
+        mSelect = mDice.nextInt(3);
         int resourceId = R.drawable.skull;
-        switch(select){
+        switch(mSelect){
             case 0:
                 resourceId =  R.drawable.skull;
                 break;
@@ -35,7 +38,7 @@ public class Enemy extends Entity {
                 resourceId = R.drawable.warning;
                 break;
             default:
-                Log.w(TAG, "You messed up your EnemyID" + select);
+                Log.w(TAG, "You messed up your EnemyID" + mSelect);
                 break;
         }
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), resourceId);
@@ -55,7 +58,23 @@ public class Enemy extends Entity {
 
     @Override
     public void update(){
-        super.update();
+        verticalWorldWrap(0, Game.STAGE_HEIGHT - mHeight);
+        mX += mVelocityX;
+        switch (mSelect){
+            case 0:
+                mY += mVelocityY;
+                verticalWorldWrap(sinCenter - Game.STAGE_HEIGHT/8, sinCenter + Game.STAGE_HEIGHT/8);
+                break;
+            case 1:
+                mY += 2 * mVelocityY;
+                break;
+            case 2:
+                mY += mDice.nextFloat() * VELOCITY_VARIANCE + mVelocityY;
+                mX += mPlayerSpeed/4;
+                break;
+            default:
+                break;
+        }
         mX += mPlayerSpeed;
     }
 
@@ -70,6 +89,12 @@ public class Enemy extends Entity {
         mY = mDice.nextInt(Game.STAGE_HEIGHT - (int) mHeight);
         mX = Game.STAGE_WIDTH + mDice.nextInt((int)mWidth);
         mVelocityX = -1 + -mDice.nextInt((int)ENEMY_MAX_SPEED);
+        mVelocityY = -1 + -mDice.nextInt((int)ENEMY_MAX_SPEED);
+        mSelect = mDice.nextInt(3);
+        if(mSelect == 0){
+            mY = Game.STAGE_HEIGHT/2;
+        }
+        sinCenter = mDice.nextInt(Game.STAGE_HEIGHT);
     }
 
     @Override
@@ -77,6 +102,15 @@ public class Enemy extends Entity {
         if(mX < -mWidth){
             respawn();
         }
+    }
+
+    public void verticalWorldWrap(float min, float max){
+        if(mY < min){
+            mVelocityY = (mVelocityY > 0) ? mVelocityY : -mVelocityY;
+        } else if(mY > max){
+            mVelocityY = (mVelocityY > 0) ? -mVelocityY : mVelocityY;
+        }
+
     }
 
     @Override

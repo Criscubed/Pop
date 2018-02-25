@@ -6,15 +6,16 @@ import android.graphics.Paint;
 
 
 public class Star extends Entity {
-    protected static final float STAR_SIZE = 10;
+    protected static final float MIN_STAR_SIZE = 5;
+    protected static final float MAX_STAR_SIZE = 12;
     protected float mPlayerSpeed = 0.0f;
     protected int mStarColor;
     public Star(){
         super(mDice.nextInt(Game.STAGE_WIDTH),
                 mDice.nextInt(Game.STAGE_HEIGHT));
-        mWidth = STAR_SIZE;
-        mHeight = STAR_SIZE;
         mVelocityX = -mDice.nextFloat();
+        mHeight = ((-mVelocityX - 0)/ (1 - 0)) * (MAX_STAR_SIZE - MIN_STAR_SIZE) + MIN_STAR_SIZE;
+        mWidth = mHeight;
         mStarColor = mDice.nextInt(5);
     }
 
@@ -26,7 +27,7 @@ public class Star extends Entity {
     @Override
     public void update(){
         super.update();
-        mX += mPlayerSpeed;
+        mX -= ((-mVelocityX - 0)/ (1 - 0)) * (-mPlayerSpeed - Player.MIN_SPEED) + Player.MIN_SPEED;
     }
     @Override
     public void render(final Canvas canvas, final Paint paint){
