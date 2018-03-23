@@ -51,7 +51,7 @@ public class SoundManager {
             CRASH = mSoundPool.load(descriptor, 0);
 
         } catch (IOException e){
-            Log.e(TAG, "Your SFX dont work, kiddo " + e.toString());
+            Log.e(TAG, String.format("Your SFX dont work, kiddo %s", e.toString()));
         }
 
     }

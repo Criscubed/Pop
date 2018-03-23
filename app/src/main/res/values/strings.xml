@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">Pop</string>
     <string name="startButtonText">Start Game</string>
+
+    <string name="health">Health:</string>
+    <string name="speed">Speed: %d</string>
+    <string name="fps">FPS: %d</string>
+    <string name="traveled">You Traveled %d km!</string>
+    <string name="newrecord">New Record: %d!</string>
+    <string name="enemyerror">You messed up your EnemyID%d</string>
+    <string name="fpsdebug">FPS: %f</string>
+    <string name="longdist">Longest Distance: %dkm</string>
+    <string name="playerdieddebug">ur ded</string>
+    <string name="powererror">Those arent real powerups%d</string>
 </resources>

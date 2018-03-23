@@ -19,13 +19,18 @@ public class Enemy extends Entity {
     public static final float ENEMY_MAX_SPEED = 3;
     public static final int ENEMY_HEIGHT = 50;
     public static final float VELOCITY_VARIANCE = 2;
+    public static final int TYPES_OF_ENEMIES = 3;
+    public static final int SINNERS = 8;
+    public static final int AMBUSHERS = 2;
+    public static final int DROPPERS = 4;
+
     private int sinCenter;
     private int mSelect;
     Bitmap mBitmap;
 
     public Enemy(Context context){
         super();
-        mSelect = mDice.nextInt(3);
+        mSelect = mDice.nextInt(TYPES_OF_ENEMIES);
         int resourceId = R.drawable.skull;
         switch(mSelect){
             case 0:
@@ -38,7 +43,7 @@ public class Enemy extends Entity {
                 resourceId = R.drawable.warning;
                 break;
             default:
-                Log.w(TAG, "You messed up your EnemyID" + mSelect);
+                Log.w(TAG, String.format(context.getString(R.string.enemyerror), mSelect));
                 break;
         }
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), resourceId);
@@ -63,14 +68,15 @@ public class Enemy extends Entity {
         switch (mSelect){
             case 0:
                 mY += mVelocityY;
-                verticalWorldWrap(sinCenter - Game.STAGE_HEIGHT/8, sinCenter + Game.STAGE_HEIGHT/8);
+                verticalWorldWrap(sinCenter - Game.STAGE_HEIGHT/SINNERS,
+                        sinCenter + Game.STAGE_HEIGHT/SINNERS);
                 break;
             case 1:
-                mY += 2 * mVelocityY;
+                mY += AMBUSHERS * mVelocityY;
                 break;
             case 2:
                 mY += mDice.nextFloat() * VELOCITY_VARIANCE + mVelocityY;
-                mX += mPlayerSpeed/4;
+                mX += mPlayerSpeed/DROPPERS;
                 break;
             default:
                 break;
@@ -90,7 +96,7 @@ public class Enemy extends Entity {
         mX = Game.STAGE_WIDTH + mDice.nextInt((int)mWidth);
         mVelocityX = -1 + -mDice.nextInt((int)ENEMY_MAX_SPEED);
         mVelocityY = -1 + -mDice.nextInt((int)ENEMY_MAX_SPEED);
-        mSelect = mDice.nextInt(3);
+        mSelect = mDice.nextInt(TYPES_OF_ENEMIES);
         if(mSelect == 0){
             mY = Game.STAGE_HEIGHT/2;
         }

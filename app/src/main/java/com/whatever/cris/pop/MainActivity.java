@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity
         Long longestDist = prefs.getLong(Game.LONGEST_DIST, 0);
 
         final TextView highScore = (TextView) findViewById(R.id.highScoreText);
-        highScore.setText("Longest Distance: " + longestDist + "km");
+        highScore.setText(String.format(getString(R.string.longdist), longestDist));
     }
 
     @Override
