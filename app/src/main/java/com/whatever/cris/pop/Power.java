@@ -17,11 +17,15 @@ public class Power extends Entity{
     public static final int SWORD = 0;
     public static final int FLAG = 1;
     public static final int BIRB = 2;
+    private static final int FASTER = 2;
+    private static final int BACKWARDS = -1;
+
 
     private Bitmap mBitmap;
     private int mType;
     private float mPlayerSpeed;
-    private int sinCenter;
+    private boolean invokingProjectile;
+    private boolean invokingBoom;
 
     public Power(Context context, int type){
         super();
@@ -38,7 +42,7 @@ public class Power extends Entity{
                 resourceId = R.drawable.birb;
                 break;
             default:
-                Log.w(TAG, "Those arent real powerups" + mType);
+                Log.w(TAG, String.format(context.getString(R.string.powererror), mType));
                 break;
         }
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), resourceId);
@@ -52,7 +56,20 @@ public class Power extends Entity{
 
     @Override
     public void input(Game game){
-        mPlayerSpeed = game.getPlayerSpeed() * -1;
+        mPlayerSpeed = game.getPlayerSpeed() * BACKWARDS;
+        if(invokingProjectile){
+            Projectile p = game.getProjectile();
+            p.setX(game.getPlayerX());
+            p.setY(game.getPlayerY());
+            p.setVelocityX(-mPlayerSpeed * FASTER);
+            invokingProjectile = false;
+        } else if(invokingBoom){
+            Boom b = game.getBoom();
+            b.setX(game.getPlayerX());
+            b.setY(game.getPlayerY());
+            b.setGrowing();
+            invokingBoom = false;
+        }
     }
 
     @Override
@@ -87,7 +104,6 @@ public class Power extends Entity{
         mX = Game.STAGE_WIDTH + mDice.nextInt((int)mWidth);
         mVelocityX = -1 + -mDice.nextInt((int)Enemy.ENEMY_MAX_SPEED);
         mVelocityY = -1 + -mDice.nextInt((int)Enemy.ENEMY_MAX_SPEED);
-        sinCenter = mDice.nextInt(Game.STAGE_HEIGHT);
     }
 
     @Override
@@ -101,4 +117,9 @@ public class Power extends Entity{
     public void onCollision(Entity that){
         respawn();
     }
+
+    public void summonProjectile(){
+        invokingProjectile = true;
+    }
+    public void commenceExplosion(){ invokingBoom = true;}
 }

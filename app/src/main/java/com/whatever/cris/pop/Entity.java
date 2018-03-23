@@ -22,9 +22,7 @@ public class Entity {
 
     public void respawn(){    }
 
-    public void input(Game game){
-
-    }
+    public void input(Game game){    }
     public void update(){
         mX += mVelocityX;
         mY += mVelocityY;
@@ -35,7 +33,6 @@ public class Entity {
         return Entity.intersectsAABB(this, that);
     }
     public void onCollision(Entity e){
-
     }
     public static boolean intersectsAABB(Entity a, Entity b){
         return !(a.right() < b.left()

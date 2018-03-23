@@ -19,6 +19,9 @@ public class Player extends Entity {
     public static float ACCELERATION = 2;
     public static final int GRAVITY = 6;
     public static final int HEIGHT = 50;
+    public static final int PLAYER_SPAWN = 10;
+
+    private String playerDied;
     private boolean mIsBoosting = false;
     private Bitmap mBitmap;
     private int mHealth = MAX_HEALTH;
@@ -28,13 +31,14 @@ public class Player extends Entity {
         Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.heart2);
         mBitmap = Utils.scaleToTargetHeight(temp ,  HEIGHT);
         respawn();
+        playerDied = context.getString(R.string.playerdieddebug);
     }
 
     public void respawn(){
         mHeight = mBitmap.getHeight();
         mWidth = mBitmap.getWidth();
         mY = Game.STAGE_HEIGHT/2 - mHeight/2;
-        mX = 10;
+        mX = PLAYER_SPAWN;
         mVelocityX = MIN_SPEED;
         mHealth = MAX_HEALTH;
     }
@@ -66,14 +70,21 @@ public class Player extends Entity {
         if(that instanceof Enemy) {
             mHealth--;
             if (mHealth < 0) {
-                Log.d(TAG, "ur ded");
+                Log.d(TAG, playerDied);
             }
         } else if (that instanceof Power){
             Power p = (Power) that;
             int whatDo = p.getPower();
             switch (whatDo){
+                case 0: //sword
+                    p.summonProjectile();
+                    break;
                 case 1: //flag
-                  mHealth++;
+                    mHealth++;
+                    break;
+                case 2: //birb
+                    p.commenceExplosion();
+                    break;
             }
             p.respawn();
         }
