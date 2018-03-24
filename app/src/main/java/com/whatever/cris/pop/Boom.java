@@ -10,9 +10,8 @@ import android.graphics.Paint;
 
 public class Boom extends Entity{
 
-    private static int NOT_MOVING = 0;
-    private static int PROJECTILE_SIZE = 5;
-    private static int HIDDEN_POSITION = -PROJECTILE_SIZE - 1;
+    private static int BOOM_SIZE = 5;
+    private static int HIDDEN_POSITION = -BOOM_SIZE - 1;
     private static int BOOM_STROKE_WIDTH = 10;
 
     private boolean growing = false;
@@ -50,8 +49,8 @@ public class Boom extends Entity{
     public void respawn(){
         mX = HIDDEN_POSITION;
         mY = HIDDEN_POSITION;
-        mWidth = PROJECTILE_SIZE;
-        mHeight = PROJECTILE_SIZE;
+        mWidth = BOOM_SIZE;
+        mHeight = BOOM_SIZE;
         growing = false;
     }
 

@@ -11,25 +11,22 @@ import android.util.Log;
  * Created by Cris on 2/18/2018.
  */
 
-public class Player extends Entity {
+public class Player extends BitmapEntity {
     public static final String TAG = "Player";
     public static final int MAX_HEALTH = 3;
     public static final int MIN_SPEED = 1;
     public static final int MAX_SPEED = 20;
     public static float ACCELERATION = 2;
     public static final int GRAVITY = 6;
-    public static final int HEIGHT = 50;
     public static final int PLAYER_SPAWN = 10;
 
     private String playerDied;
     private boolean mIsBoosting = false;
-    private Bitmap mBitmap;
     private int mHealth = MAX_HEALTH;
 
     public Player(Context context){
         super();
-        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), R.drawable.heart2);
-        mBitmap = Utils.scaleToTargetHeight(temp ,  HEIGHT);
+        setBitmap(context, R.drawable.heart2);
         respawn();
         playerDied = context.getString(R.string.playerdieddebug);
     }
@@ -59,12 +56,6 @@ public class Player extends Entity {
         mY = Utils.clamp(mY, 0, Game.STAGE_HEIGHT - HEIGHT);
         //mX += mVelocityX;
     }
-
-    @Override
-    public void render(final Canvas canvas, final Paint paint) {
-        canvas.drawBitmap(mBitmap, mX, mY, paint);
-    }
-
     @Override
     public void onCollision(Entity that){
         if(that instanceof Enemy) {

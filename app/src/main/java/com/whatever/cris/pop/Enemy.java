@@ -1,7 +1,6 @@
 package com.whatever.cris.pop;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,20 +12,18 @@ import android.util.Log;
  * Created by Cris on 2/17/2018.
  */
 
-public class Enemy extends Entity {
-    protected float mPlayerSpeed = 0.0f;
+public class Enemy extends BitmapEntity {
     public static final String TAG = "Enemy";
     public static final float ENEMY_MAX_SPEED = 3;
-    public static final int ENEMY_HEIGHT = 50;
     public static final float VELOCITY_VARIANCE = 2;
     public static final int TYPES_OF_ENEMIES = 3;
     public static final int SINNERS = 8;
     public static final int AMBUSHERS = 2;
     public static final int DROPPERS = 4;
+    public static final int BACKWARDS = -1;
 
     private int sinCenter;
     private int mSelect;
-    Bitmap mBitmap;
 
     public Enemy(Context context){
         super();
@@ -46,19 +43,14 @@ public class Enemy extends Entity {
                 Log.w(TAG, String.format(context.getString(R.string.enemyerror), mSelect));
                 break;
         }
-        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), resourceId);
-        mBitmap = Utils.scaleToTargetHeight(temp ,  ENEMY_HEIGHT);
-        mBitmap = Utils.flipBitmap(mBitmap, false);
-        if(temp != mBitmap){
-            temp.recycle();
-        }
+        setBitmap(context, resourceId);
         respawn();
 
     }
 
     @Override
     public void input(Game game){
-        mPlayerSpeed = game.getPlayerSpeed() * -1;
+        mPlayerSpeed = game.getPlayerSpeed() * BACKWARDS;
     }
 
     @Override
@@ -82,11 +74,6 @@ public class Enemy extends Entity {
                 break;
         }
         mX += mPlayerSpeed;
-    }
-
-    @Override
-    public void render(final Canvas canvas,final Paint paint) {
-        canvas.drawBitmap(mBitmap, mX, mY, paint);
     }
 
     public void respawn(){

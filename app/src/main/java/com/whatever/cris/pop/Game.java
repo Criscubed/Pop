@@ -21,15 +21,6 @@ public class Game extends SurfaceView implements Runnable {
     public static final String TAG = "Game";
     public static final int STAGE_WIDTH = 1280;
     public static final int STAGE_HEIGHT = 720;
-    public static final long SECONDS_TO_NANOS = 1000000000;
-    public static final long MILLIS_TO_NANOS = 1000000;
-    public static final float NANOS_TO_MILLIS  = 1.0f/MILLIS_TO_NANOS;
-    public static final float NANOS_TO_SECONDS = 1.0f/SECONDS_TO_NANOS;
-    public static final long SAMPLE_INTERVAL = 1 * SECONDS_TO_NANOS;
-    public static final long TARGET_FRAMERATE = 30;
-    public static final long MS_PER_FRAME = 1000/TARGET_FRAMERATE;
-    public static final long  NANOS_PER_FRAME = MS_PER_FRAME * MILLIS_TO_NANOS;
-
 
     private boolean mIsRunning = false;
     private Thread mGameThread = null;
@@ -50,15 +41,14 @@ public class Game extends SurfaceView implements Runnable {
     public static final String LONGEST_DIST = "longest_distance";
 
     private HUD mHud;
-    private long mLastSampleTime = 0;
-    private long mFrameCount = 0;
-    private float mAvgFramerate = 0;
+    private Frame mFrame;
 
     private SoundManager mSoundManager;
 
     public Game(final Context context) {
         super(context);
         mHud = new HUD(context);
+        mFrame = new Frame();
         mSoundManager = new SoundManager(context);
         mHolder = getHolder();
         mHolder.setFixedSize(STAGE_WIDTH, STAGE_HEIGHT);
@@ -96,14 +86,13 @@ public class Game extends SurfaceView implements Runnable {
     @Override
     public void run() {
         while(mIsRunning){
-            long start = System.nanoTime();
-            onEnterFrame();
+            mFrame.start();
             input();
             update();
             checkCollisions();
             checkForGameOver();
             render();
-            rateLimit(start);
+            mFrame.rateLimit();
         }
     }
 
@@ -159,7 +148,7 @@ public class Game extends SurfaceView implements Runnable {
         if(mGameOver){
             mHud.drawGameOverHUD(mCanvas, mPaint, mDistanceTraveled, mLongestDistanceTraveled);
         } else {
-            mHud.drawHUD(mCanvas, mPaint, mPlayer, mAvgFramerate);
+            mHud.drawHUD(mCanvas, mPaint, mPlayer, mFrame.getmAvgFramerate());
         }
         mHolder.unlockCanvasAndPost(mCanvas);
     }
@@ -189,9 +178,6 @@ public class Game extends SurfaceView implements Runnable {
         }
     }
 
-
-
-
     private boolean acquireAndLockCanvas() {
         if(!mHolder.getSurface().isValid()){
             return false;
@@ -212,27 +198,6 @@ public class Game extends SurfaceView implements Runnable {
             edit.putLong(LONGEST_DIST, mDistanceTraveled);
             edit.apply();
         }
-    }
-
-    public void rateLimit(long start){
-        float millisRemaining = ((start + NANOS_PER_FRAME) - System.nanoTime()) * NANOS_TO_MILLIS;
-        if(millisRemaining > 1){
-            try {
-                Thread.sleep((long)millisRemaining);
-            } catch (InterruptedException e) {
-            }
-        }
-    }
-    private void onEnterFrame(){
-        mFrameCount++;
-        long timeSinceLast = System.nanoTime() - mLastSampleTime;
-        if(timeSinceLast < SAMPLE_INTERVAL){
-            return;
-        }
-        mAvgFramerate = mFrameCount / (timeSinceLast * NANOS_TO_SECONDS);
-        mLastSampleTime = System.nanoTime();
-        mFrameCount = 0;
-        Log.d(TAG, String.format(getContext().getString(R.string.fpsdebug), mAvgFramerate));
     }
 
     @Override

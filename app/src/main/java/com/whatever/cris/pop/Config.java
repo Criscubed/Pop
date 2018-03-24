@@ -6,7 +6,7 @@ package com.whatever.cris.pop;
 
 public class Config {
 
-    public static final boolean SHOW_FPS = false;
+    public static final boolean SHOW_FPS = true;
 
     public static final int ENEMY_COUNT = 10;
     public static final int STAR_COUNT = 64;

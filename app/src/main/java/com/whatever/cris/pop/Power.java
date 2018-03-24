@@ -11,9 +11,8 @@ import android.util.Log;
  * Created by Cris on 2/25/2018.
  */
 
-public class Power extends Entity{
+public class Power extends BitmapEntity{
     public static final String TAG = "Power";
-    public static final int POWER_HEIGHT = 50;
     public static final int SWORD = 0;
     public static final int FLAG = 1;
     public static final int BIRB = 2;
@@ -21,9 +20,7 @@ public class Power extends Entity{
     private static final int BACKWARDS = -1;
 
 
-    private Bitmap mBitmap;
     private int mType;
-    private float mPlayerSpeed;
     private boolean invokingProjectile;
     private boolean invokingBoom;
 
@@ -45,12 +42,7 @@ public class Power extends Entity{
                 Log.w(TAG, String.format(context.getString(R.string.powererror), mType));
                 break;
         }
-        Bitmap temp = BitmapFactory.decodeResource(context.getResources(), resourceId);
-        mBitmap = Utils.scaleToTargetHeight(temp ,  POWER_HEIGHT);
-        mBitmap = Utils.flipBitmap(mBitmap, false);
-        if(temp != mBitmap){
-            temp.recycle();
-        }
+        setBitmap(context, resourceId);
         respawn();
     }
 
@@ -77,11 +69,6 @@ public class Power extends Entity{
         verticalWorldWrap(0, Game.STAGE_HEIGHT - mHeight);
         mY += mVelocityY;
         mX += mPlayerSpeed;;
-    }
-
-    @Override
-    public void render(final Canvas canvas, final Paint paint) {
-        canvas.drawBitmap(mBitmap, mX, mY, paint);
     }
 
     public int getPower(){
